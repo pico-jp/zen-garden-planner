@@ -12,9 +12,9 @@ A minimal Flask + p5.js demo for visualizing Zen garden plans with interactive r
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\\Scripts\\activate
    ```
-2. Install Flask (the only dependency).
+2. Install dependencies from `requirements.txt`.
    ```bash
-   pip install flask
+   pip install -r requirements.txt
    ```
 3. Start the development server from the project root.
    ```bash
