@@ -19,7 +19,7 @@ function setup() {
   pg.pixelDensity(1);
 
   loadImage(
-    '/static/rock.png',
+    '/rock-image',
     img => {
       rockImg = img;
       rockLoaded = true;

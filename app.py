@@ -1,8 +1,13 @@
-from flask import Flask, jsonify, render_template, request
+import os
+from flask import Flask, abort, jsonify, render_template, request, send_file
 
 app = Flask(__name__)
 
 CURRENT_PLAN = {"steps": []}
+
+ROCK_IMAGE_PATH = os.environ.get(
+    "ROCK_IMAGE_PATH", "/Users/masahikon/work/251206_zen/rock.png"
+)
 
 
 @app.route("/")
@@ -25,6 +30,21 @@ def update_plan():
         return jsonify({"status": "error", "message": "Plan must include steps list"}), 400
     CURRENT_PLAN = {"steps": data.get("steps", [])}
     return jsonify({"status": "ok", "plan": CURRENT_PLAN})
+
+
+@app.route("/rock-image")
+def rock_image():
+    """Serve a local rock image if available.
+
+    The image path is configured via the ROCK_IMAGE_PATH environment variable.
+    Defaults to /Users/masahikon/work/251206_zen/rock.png so the caller can
+    keep using a local asset without checking it into the repository.
+    """
+
+    if not ROCK_IMAGE_PATH or not os.path.exists(ROCK_IMAGE_PATH):
+        abort(404)
+
+    return send_file(ROCK_IMAGE_PATH, mimetype="image/png")
 
 
 if __name__ == "__main__":

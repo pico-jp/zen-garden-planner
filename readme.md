@@ -28,3 +28,13 @@ A minimal Flask + p5.js demo for visualizing Zen garden plans with interactive r
 - `static/sketch.js` — p5.js sketch that renders sand shading and applies rake patterns from the plan.
 - `static/rock.png` — optional transparent PNG used as the garden rock (not committed to avoid binary attachment warnings). If absent, the p5 sketch renders a placeholder shape instead.
 
+## Rock image from a local path
+The app tries to load a rock image from a local path so you can keep the binary outside the repository.
+
+* Set an environment variable `ROCK_IMAGE_PATH` before running the app to point at your local file.
+  ```bash
+  export ROCK_IMAGE_PATH="/Users/masahikon/work/251206_zen/rock.png"
+  python app.py
+  ```
+* If the file exists, the browser will load it from the `/rock-image` endpoint. If it is missing, the p5 sketch shows a placeholder.
+
