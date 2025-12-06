@@ -26,5 +26,5 @@ A minimal Flask + p5.js demo for visualizing Zen garden plans with interactive r
 - `app.py` — Flask app with simple in-memory plan storage and API endpoints.
 - `templates/index.html` — UI layout, buttons for adding steps, and plan save/load hooks.
 - `static/sketch.js` — p5.js sketch that renders sand shading and applies rake patterns from the plan.
-- `static/rock.png` — placeholder transparent PNG used as the garden rock.
+- `static/rock.png` — optional transparent PNG used as the garden rock (not committed to avoid binary attachment warnings). If absent, the p5 sketch renders a placeholder shape instead.
 

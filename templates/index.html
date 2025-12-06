@@ -85,6 +85,19 @@
     const btnCircle = document.getElementById('btnCircle');
     const btnCluster = document.getElementById('btnCluster');
 
+    function deactivateActionButton(button) {
+      if (!button) return;
+      button.disabled = true;
+      button.classList.add('deactivated');
+    }
+
+    function syncActionButtons() {
+      const types = new Set(plan.steps.map(step => step.type));
+      if (types.has('horizontal')) deactivateActionButton(btnHorizontal);
+      if (types.has('circle')) deactivateActionButton(btnCircle);
+      if (types.has('cluster')) deactivateActionButton(btnCluster);
+    }
+
     function updateStepList() {
       const listDiv = document.getElementById('stepList');
       if (!plan.steps.length) {
@@ -101,11 +114,8 @@
         }
         return `${idx + 1}. 未知のステップ`;
       }).join('<br>');
-    }
 
-    function deactivateActionButton(button) {
-      button.disabled = true;
-      button.classList.add('deactivated');
+      syncActionButtons();
     }
 
     async function loadPlan() {
