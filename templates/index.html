@@ -109,11 +109,11 @@
       }
       listDiv.innerHTML = plan.steps.map((step, idx) => {
         if (step.type === 'horizontal') {
-          return `${idx + 1}. 横線 (numLines: ${step.numLines || 36})`;
+          return `${idx + 1}. 横線を描く (線の本数: ${step.numLines || 36})`;
         } else if (step.type === 'circle') {
-          return `${idx + 1}. 大円 (r: ${step.r || 100})`;
+          return `${idx + 1}. 大円を描く (半径: ${step.r || 100})`;
         } else if (step.type === 'cluster') {
-          return `${idx + 1}. 小円 (r: ${step.r || 65})`;
+          return `${idx + 1}. 小円を描く (半径: ${step.r || 65})`;
         } else if (step.type === 'rock') {
           return `${idx + 1}. 岩を配置`;
         }
