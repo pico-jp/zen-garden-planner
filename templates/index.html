@@ -69,12 +69,12 @@
   <div class="layout">
     <div id="ui-panel">
       <h1>Zen Garden Planner</h1>
-      <button id="btnHorizontal">横線を描く</button>
-      <button id="btnCircle">大円を描く</button>
-      <button id="btnCluster">小円を描く</button>
-      <button id="btnRock">岩を配置</button>
-      <div id="stepList">ステップがまだありません。</div>
-      <button id="btnRun">Run Zen</button>
+      <button id="btnHorizontal">Draw horizontal lines</button>
+      <button id="btnCircle">Draw a large circle</button>
+      <button id="btnCluster">Draw small circles</button>
+      <button id="btnRock">Place a rock</button>
+      <div id="stepList">No steps yet.</div>
+      <button id="btnRun">Run ZenBot</button>
     </div>
     <div id="canvas-container"></div>
   </div>
@@ -105,20 +105,20 @@
     function updateStepList() {
       const listDiv = document.getElementById('stepList');
       if (!plan.steps.length) {
-        listDiv.textContent = 'ステップがまだありません。';
+        listDiv.textContent = 'No steps yet.';
         return;
       }
       listDiv.innerHTML = plan.steps.map((step, idx) => {
         if (step.type === 'horizontal') {
-          return `${idx + 1}. 横線を描く (線の本数: ${step.numLines || 36})`;
+          return `${idx + 1}. Draw horizontal lines (count: ${step.numLines || 36})`;
         } else if (step.type === 'circle') {
-          return `${idx + 1}. 大円を描く (半径: ${step.r || 100})`;
+          return `${idx + 1}. Draw a large circle (radius: ${step.r || 100})`;
         } else if (step.type === 'cluster') {
-          return `${idx + 1}. 小円を描く (半径: ${step.r || 65})`;
+          return `${idx + 1}. Draw small circles (radius: ${step.r || 65})`;
         } else if (step.type === 'rock') {
-          return `${idx + 1}. 岩を配置`;
+          return `${idx + 1}. Place a rock`;
         }
-        return `${idx + 1}. 未知のステップ`;
+        return `${idx + 1}. Unknown step`;
       }).join('<br>');
 
       syncActionButtons();
@@ -167,8 +167,8 @@
 
     btnRun.addEventListener('click', () => {
       const mockMessage = plan.steps.length
-        ? `Run Zen (mock): ${plan.steps.length} ステップを順番に実行します。`
-        : 'Run Zen (mock): 実行するステップがありません。';
+        ? `Run ZenBot (mock): Executing ${plan.steps.length} step(s) in order.`
+        : 'Run ZenBot (mock): No steps to execute.';
       console.log(mockMessage);
       alert(mockMessage);
     });
