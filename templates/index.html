@@ -93,6 +93,9 @@
     .spacingA {
       margin-top: 20px !important;
     }
+    .spacingB {
+      margin-top: 28px !important;
+    }
     #canvas-container {
       width: 100%;
       display: flex;
@@ -109,7 +112,7 @@
       <button id="btnCircle">Draw Large Circle</button>
       <button id="btnCluster">Draw Small Circles</button>
       <button id="btnRock">Place Rock</button>
-      <h2 class="spacingA">Steps</h2>
+      <h2 class="spacingB">Steps</h2>
       <div id="stepList">No steps yet.</div>
       <button id="btnClear">Clear</button>
       <button id="btnRun" class="spacingA">Start ZenBot</button>
@@ -164,11 +167,11 @@
       }
       listDiv.innerHTML = plan.steps.map((step, idx) => {
         if (step.type === 'horizontal') {
-          return `${idx + 1}. Draw Lines (count: ${step.numLines || 36})`;
+          return `${idx + 1}. Draw Lines`;
         } else if (step.type === 'circle') {
-          return `${idx + 1}. Draw Large Circle (radius: ${step.r || 100})`;
+          return `${idx + 1}. Draw Large Circle`;
         } else if (step.type === 'cluster') {
-          return `${idx + 1}. Draw Small Circles (radius: ${step.r || 65})`;
+          return `${idx + 1}. Draw Small Circles`;
         } else if (step.type === 'rock') {
           return `${idx + 1}. Place Rock`;
         }
