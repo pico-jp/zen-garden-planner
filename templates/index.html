@@ -23,10 +23,6 @@
       background: #ffffff;
       box-shadow: 2px 0 6px rgba(0,0,0,0.1);
     }
-    #ui-panel h1 {
-      font-size: 20px;
-      margin-top: 0;
-    }
     #ui-panel h2 {
       font-size: 16px;
       margin: 16px 0 8px;
@@ -66,14 +62,35 @@
       flex-direction: column;
       padding: 20px;
       gap: 12px;
+      align-items: center;
+    }
+    .preview-area h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #111827;
+      text-align: center;
     }
     .preview-area h2 {
       margin: 0;
       font-size: 18px;
       color: #1f2937;
+      text-align: center;
+    }
+    .logo-wrapper {
+      margin-top: 6px;
+    }
+    .logo-wrapper img {
+      max-width: 260px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .preview-label {
+      margin-top: 16px;
     }
     #canvas-container {
-      flex: 1;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -83,7 +100,6 @@
 <body>
   <div class="layout">
     <div id="ui-panel">
-      <h1>ZenBot: The Zen Garden Maker</h1>
       <h2>Add Step</h2>
       <button id="btnHorizontal">Draw Lines</button>
       <button id="btnCircle">Draw Large Circle</button>
@@ -94,7 +110,11 @@
       <button id="btnRun">Start ZenBot</button>
     </div>
     <div class="preview-area">
-      <h2>Zen Garden Preview</h2>
+      <h1>ZenBot: The Zen Garden Maker</h1>
+      <div class="logo-wrapper">
+        <img src="/karesansui-image" alt="Karesansui logo" onerror="this.style.display='none'">
+      </div>
+      <h2 class="preview-label">Zen Garden Preview</h2>
       <div id="canvas-container"></div>
     </div>
   </div>

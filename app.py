@@ -8,6 +8,9 @@ CURRENT_PLAN = {"steps": []}
 ROCK_IMAGE_PATH = os.environ.get(
     "ROCK_IMAGE_PATH", "/Users/masahikon/work/251206_zen/rock.png"
 )
+KARESANSUI_IMAGE_PATH = os.environ.get(
+    "KARESANSUI_IMAGE_PATH", "/Users/masahikon/work/251206_zen/karesansui.png"
+)
 
 
 @app.route("/")
@@ -45,6 +48,21 @@ def rock_image():
         abort(404)
 
     return send_file(ROCK_IMAGE_PATH, mimetype="image/png")
+
+
+@app.route("/karesansui-image")
+def karesansui_image():
+    """Serve a local karesansui logo if available.
+
+    The image path is configured via the KARESANSUI_IMAGE_PATH environment variable.
+    Defaults to /Users/masahikon/work/251206_zen/karesansui.png to allow using a
+    local asset without committing it to the repository.
+    """
+
+    if not KARESANSUI_IMAGE_PATH or not os.path.exists(KARESANSUI_IMAGE_PATH):
+        abort(404)
+
+    return send_file(KARESANSUI_IMAGE_PATH, mimetype="image/png")
 
 
 if __name__ == "__main__":
