@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zen Garden Planner</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    #ui-panel {
+      width: 280px;
+      padding: 16px;
+      background: #ffffff;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+    }
+    #ui-panel h1 {
+      font-size: 20px;
+      margin-top: 0;
+    }
+    #ui-panel button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 14px;
+      cursor: pointer;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+    }
+    #ui-panel button:hover {
+      background: #2563eb;
+    }
+    #ui-panel button:disabled,
+    #ui-panel button.deactivated {
+      background: #cbd5e1;
+      color: #475569;
+      cursor: not-allowed;
+    }
+    #stepList {
+      margin-top: 16px;
+      padding: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      min-height: 120px;
+      font-size: 14px;
+    }
+    #canvas-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div id="ui-panel">
+      <h1>Zen Garden Planner</h1>
+      <button id="btnHorizontal">横線を描く</button>
+      <button id="btnCircle">大円を描く</button>
+      <button id="btnCluster">小円を描く</button>
+      <button id="btnRock">岩を配置</button>
+      <button id="btnSave">Python にプランを保存</button>
+      <div id="stepList">ステップがまだありません。</div>
+    </div>
+    <div id="canvas-container"></div>
+  </div>
+
+  <script src="/static/sketch.js"></script>
+  <script>
+    let plan = { steps: [] };
+    const btnHorizontal = document.getElementById('btnHorizontal');
+    const btnCircle = document.getElementById('btnCircle');
+    const btnCluster = document.getElementById('btnCluster');
+    const btnRock = document.getElementById('btnRock');
+
+    function deactivateActionButton(button) {
+      if (!button) return;
+      button.disabled = true;
+      button.classList.add('deactivated');
+    }
+
+    function syncActionButtons() {
+      const types = new Set(plan.steps.map(step => step.type));
+      if (types.has('horizontal')) deactivateActionButton(btnHorizontal);
+      if (types.has('circle')) deactivateActionButton(btnCircle);
+      if (types.has('cluster')) deactivateActionButton(btnCluster);
+      if (types.has('rock')) deactivateActionButton(btnRock);
+    }
+
+    function updateStepList() {
+      const listDiv = document.getElementById('stepList');
+      if (!plan.steps.length) {
+        listDiv.textContent = 'ステップがまだありません。';
+        return;
+      }
+      listDiv.innerHTML = plan.steps.map((step, idx) => {
+        if (step.type === 'horizontal') {
+          return `${idx + 1}. 横線を描く (線の本数: ${step.numLines || 36})`;
+        } else if (step.type === 'circle') {
+          return `${idx + 1}. 大円を描く (半径: ${step.r || 100})`;
+        } else if (step.type === 'cluster') {
+          return `${idx + 1}. 小円を描く (半径: ${step.r || 65})`;
+        } else if (step.type === 'rock') {
+          return `${idx + 1}. 岩を配置`;
+        }
+        return `${idx + 1}. 未知のステップ`;
+      }).join('<br>');
+
+      syncActionButtons();
+    }
+
+    async function loadPlan() {
+      try {
+        const res = await fetch('/api/plan');
+        plan = await res.json();
+        updateStepList();
+        if (typeof redrawZen === 'function') {
+          redrawZen(plan);
+        }
+      } catch (err) {
+        console.error('Failed to load plan', err);
+      }
+    }
+
+    async function savePlan() {
+      try {
+        await fetch('/api/plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(plan)
+        });
+        alert('プランを保存しました。');
+      } catch (err) {
+        console.error('Failed to save plan', err);
+      }
+    }
+
+    btnHorizontal.addEventListener('click', (event) => {
+      plan.steps.push({ type: 'horizontal', numLines: 36 });
+      updateStepList();
+      redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
+    });
+
+    btnCircle.addEventListener('click', (event) => {
+      plan.steps.push({ type: 'circle', r: 100 });
+      updateStepList();
+      redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
+    });
+
+    btnCluster.addEventListener('click', (event) => {
+      plan.steps.push({ type: 'cluster', r: 65 });
+      updateStepList();
+      redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
+    });
+
+    btnRock.addEventListener('click', (event) => {
+      plan.steps.push({ type: 'rock' });
+      updateStepList();
+      redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
+    });
+
+    document.getElementById('btnSave').addEventListener('click', savePlan);
+
+    window.addEventListener('load', loadPlan);
+  </script>
+</body>
+</html>
