@@ -73,8 +73,8 @@
       <button id="btnCircle">大円を描く</button>
       <button id="btnCluster">小円を描く</button>
       <button id="btnRock">岩を配置</button>
-      <button id="btnSave">Python にプランを保存</button>
       <div id="stepList">ステップがまだありません。</div>
+      <button id="btnRun">Run Zen</button>
     </div>
     <div id="canvas-container"></div>
   </div>
@@ -86,6 +86,7 @@
     const btnCircle = document.getElementById('btnCircle');
     const btnCluster = document.getElementById('btnCluster');
     const btnRock = document.getElementById('btnRock');
+    const btnRun = document.getElementById('btnRun');
 
     function deactivateActionButton(button) {
       if (!button) return;
@@ -136,19 +137,6 @@
       }
     }
 
-    async function savePlan() {
-      try {
-        await fetch('/api/plan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(plan)
-        });
-        alert('プランを保存しました。');
-      } catch (err) {
-        console.error('Failed to save plan', err);
-      }
-    }
-
     btnHorizontal.addEventListener('click', (event) => {
       plan.steps.push({ type: 'horizontal', numLines: 36 });
       updateStepList();
@@ -177,7 +165,13 @@
       deactivateActionButton(event.currentTarget);
     });
 
-    document.getElementById('btnSave').addEventListener('click', savePlan);
+    btnRun.addEventListener('click', () => {
+      const mockMessage = plan.steps.length
+        ? `Run Zen (mock): ${plan.steps.length} ステップを順番に実行します。`
+        : 'Run Zen (mock): 実行するステップがありません。';
+      console.log(mockMessage);
+      alert(mockMessage);
+    });
 
     window.addEventListener('load', loadPlan);
   </script>
