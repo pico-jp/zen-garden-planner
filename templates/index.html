@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zen Garden Planner</title>
+  <title>ZenBot: The Zen Garden Maker</title>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
   <style>
     body {
@@ -26,6 +26,10 @@
     #ui-panel h1 {
       font-size: 20px;
       margin-top: 0;
+    }
+    #ui-panel h2 {
+      font-size: 16px;
+      margin: 16px 0 8px;
     }
     #ui-panel button {
       display: block;
@@ -56,27 +60,43 @@
       min-height: 120px;
       font-size: 14px;
     }
+    .preview-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 12px;
+    }
+    .preview-area h2 {
+      margin: 0;
+      font-size: 18px;
+      color: #1f2937;
+    }
     #canvas-container {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
     }
   </style>
 </head>
 <body>
   <div class="layout">
     <div id="ui-panel">
-      <h1>Zen Garden Planner</h1>
-      <button id="btnHorizontal">Draw horizontal lines</button>
-      <button id="btnCircle">Draw a large circle</button>
-      <button id="btnCluster">Draw small circles</button>
-      <button id="btnRock">Place a rock</button>
+      <h1>ZenBot: The Zen Garden Maker</h1>
+      <h2>Add Step</h2>
+      <button id="btnHorizontal">Draw Lines</button>
+      <button id="btnCircle">Draw Large Circle</button>
+      <button id="btnCluster">Draw Small Circles</button>
+      <button id="btnRock">Place Rock</button>
+      <h2>Steps</h2>
       <div id="stepList">No steps yet.</div>
-      <button id="btnRun">Run ZenBot</button>
+      <button id="btnRun">Start ZenBot</button>
     </div>
-    <div id="canvas-container"></div>
+    <div class="preview-area">
+      <h2>Zen Garden Preview</h2>
+      <div id="canvas-container"></div>
+    </div>
   </div>
 
   <script src="/static/sketch.js"></script>
@@ -110,13 +130,13 @@
       }
       listDiv.innerHTML = plan.steps.map((step, idx) => {
         if (step.type === 'horizontal') {
-          return `${idx + 1}. Draw horizontal lines (count: ${step.numLines || 36})`;
+          return `${idx + 1}. Draw Lines (count: ${step.numLines || 36})`;
         } else if (step.type === 'circle') {
-          return `${idx + 1}. Draw a large circle (radius: ${step.r || 100})`;
+          return `${idx + 1}. Draw Large Circle (radius: ${step.r || 100})`;
         } else if (step.type === 'cluster') {
-          return `${idx + 1}. Draw small circles (radius: ${step.r || 65})`;
+          return `${idx + 1}. Draw Small Circles (radius: ${step.r || 65})`;
         } else if (step.type === 'rock') {
-          return `${idx + 1}. Place a rock`;
+          return `${idx + 1}. Place Rock`;
         }
         return `${idx + 1}. Unknown step`;
       }).join('<br>');
@@ -167,8 +187,8 @@
 
     btnRun.addEventListener('click', () => {
       const mockMessage = plan.steps.length
-        ? `Run ZenBot (mock): Executing ${plan.steps.length} step(s) in order.`
-        : 'Run ZenBot (mock): No steps to execute.';
+        ? `Start ZenBot (mock): Executing ${plan.steps.length} step(s) in order.`
+        : 'Start ZenBot (mock): No steps to execute.';
       console.log(mockMessage);
       alert(mockMessage);
     });
