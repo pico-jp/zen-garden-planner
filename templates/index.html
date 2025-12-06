@@ -42,6 +42,12 @@
     #ui-panel button:hover {
       background: #2563eb;
     }
+    #ui-panel button:disabled,
+    #ui-panel button.deactivated {
+      background: #cbd5e1;
+      color: #475569;
+      cursor: not-allowed;
+    }
     #stepList {
       margin-top: 16px;
       padding: 8px;
@@ -75,6 +81,9 @@
   <script src="/static/sketch.js"></script>
   <script>
     let plan = { steps: [] };
+    const btnHorizontal = document.getElementById('btnHorizontal');
+    const btnCircle = document.getElementById('btnCircle');
+    const btnCluster = document.getElementById('btnCluster');
 
     function updateStepList() {
       const listDiv = document.getElementById('stepList');
@@ -92,6 +101,11 @@
         }
         return `${idx + 1}. 未知のステップ`;
       }).join('<br>');
+    }
+
+    function deactivateActionButton(button) {
+      button.disabled = true;
+      button.classList.add('deactivated');
     }
 
     async function loadPlan() {
@@ -120,22 +134,25 @@
       }
     }
 
-    document.getElementById('btnHorizontal').addEventListener('click', () => {
+    btnHorizontal.addEventListener('click', (event) => {
       plan.steps.push({ type: 'horizontal', numLines: 36 });
       updateStepList();
       redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
     });
 
-    document.getElementById('btnCircle').addEventListener('click', () => {
+    btnCircle.addEventListener('click', (event) => {
       plan.steps.push({ type: 'circle', r: 100 });
       updateStepList();
       redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
     });
 
-    document.getElementById('btnCluster').addEventListener('click', () => {
+    btnCluster.addEventListener('click', (event) => {
       plan.steps.push({ type: 'cluster', r: 65 });
       updateStepList();
       redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
     });
 
     document.getElementById('btnSave').addEventListener('click', savePlan);
