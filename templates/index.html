@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZenBot: The Zen Garden Maker</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    #ui-panel {
+      width: 280px;
+      padding: 16px;
+      background: #ffffff;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+    }
+    #ui-panel h2 {
+      font-size: 16px;
+      margin: 16px 0 8px;
+    }
+    #ui-panel button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 14px;
+      cursor: pointer;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+    }
+    #ui-panel button:hover {
+      background: #2563eb;
+    }
+    #ui-panel button:disabled,
+    #ui-panel button.deactivated {
+      background: #cbd5e1;
+      color: #475569;
+      cursor: not-allowed;
+    }
+    #stepList {
+      margin-top: 16px;
+      padding: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      min-height: 120px;
+      font-size: 14px;
+    }
+    .preview-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 12px;
+      align-items: center;
+    }
+    .preview-area h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #111827;
+      text-align: center;
+    }
+    .preview-area h2 {
+      margin: 0;
+      font-size: 18px;
+      color: #1f2937;
+      text-align: center;
+    }
+    .logo-wrapper {
+      margin-top: 6px;
+      margin-bottom: 32px;
+    }
+    .logo-wrapper img {
+      max-width: 260px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .preview-label {
+      margin-top: 0;
+    }
+    .spacingA {
+      margin-top: 20px !important;
+    }
+    .spacingB {
+      margin-top: 28px !important;
+    }
+    #canvas-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div id="ui-panel">
+      <h2>Add Step</h2>
+      <button id="btnHorizontal">Draw Lines</button>
+      <button id="btnCircle">Draw Large Circle</button>
+      <button id="btnCluster">Draw Small Circles</button>
+      <button id="btnRock">Place Rock</button>
+      <h2 class="spacingB">Steps</h2>
+      <div id="stepList">No steps yet.</div>
+      <button id="btnClear">Clear</button>
+      <button id="btnRun" class="spacingA">Start ZenBot</button>
+    </div>
+    <div class="preview-area">
+      <h1>ZenBot: The Zen Garden Maker</h1>
+      <div class="logo-wrapper">
+        <img src="/karesansui-image" alt="Karesansui logo" onerror="this.style.display='none'">
+      </div>
+      <h2 class="preview-label">Preview</h2>
+      <div id="canvas-container"></div>
+    </div>
+  </div>
+
+  <script src="/static/sketch.js"></script>
+  <script>
+    let plan = { steps: [] };
+    const btnHorizontal = document.getElementById('btnHorizontal');
+    const btnCircle = document.getElementById('btnCircle');
+    const btnCluster = document.getElementById('btnCluster');
+    const btnRock = document.getElementById('btnRock');
+    const btnClear = document.getElementById('btnClear');
+    const btnRun = document.getElementById('btnRun');
+
+    function deactivateActionButton(button) {
+      if (!button) return;
+      button.disabled = true;
+      button.classList.add('deactivated');
+    }
+
+    function reactivateActionButtons() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = false;
+        btn.classList.remove('deactivated');
+      });
+    }
+
+    function syncActionButtons() {
+      const types = new Set(plan.steps.map(step => step.type));
+      if (types.has('horizontal')) deactivateActionButton(btnHorizontal);
+      if (types.has('circle')) deactivateActionButton(btnCircle);
+      if (types.has('cluster')) deactivateActionButton(btnCluster);
+      if (types.has('rock')) deactivateActionButton(btnRock);
+    }
+
+    function updateStepList() {
+      const listDiv = document.getElementById('stepList');
+      if (!plan.steps.length) {
+        listDiv.textContent = 'No steps yet.';
+        return;
+      }
+      listDiv.innerHTML = plan.steps.map((step, idx) => {
+        if (step.type === 'horizontal') {
+          return `${idx + 1}. Draw Lines (count: ${step.numLines || 36})`;
+        } else if (step.type === 'circle') {
+          return `${idx + 1}. Draw Large Circle (radius: ${step.r || 100})`;
+        } else if (step.type === 'cluster') {
+          return `${idx + 1}. Draw Small Circles (radius: ${step.r || 65})`;
+        } else if (step.type === 'rock') {
+          return `${idx + 1}. Place Rock`;
+        }
+        return `${idx + 1}. Unknown step`;
+      }).join('<br>');
+
+      syncActionButtons();
+    }
+
+    async function loadPlan() {
+      try {
+        const res = await fetch('/api/plan');
+        plan = await res.json();
+        updateStepList();
+        if (typeof redrawZen === 'function') {
+          redrawZen(plan);
+        }
+      } catch (err) {
+        console.error('Failed to load plan', err);
+      }
+    }
+
+    btnHorizontal.addEventListener('click', (event) => {
+      plan.steps.push({ type: 'horizontal', numLines: 36 });
+      updateStepList();
+      redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
+    });
+
+    btnCircle.addEventListener('click', (event) => {
+      plan.steps.push({ type: 'circle', r: 100 });
+      updateStepList();
+      redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
+    });
+
+    btnCluster.addEventListener('click', (event) => {
+      plan.steps.push({ type: 'cluster', r: 65 });
+      updateStepList();
+      redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
+    });
+
+    btnRock.addEventListener('click', (event) => {
+      plan.steps.push({ type: 'rock' });
+      updateStepList();
+      redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
+    });
+
+    btnClear.addEventListener('click', () => {
+      plan = { steps: [] };
+      updateStepList();
+      redrawZen(plan);
+      reactivateActionButtons();
+    });
+
+    btnRun.addEventListener('click', () => {
+      const mockMessage = plan.steps.length
+        ? `Start ZenBot (mock): Executing ${plan.steps.length} step(s) in order.`
+        : 'Start ZenBot (mock): No steps to execute.';
+      console.log(mockMessage);
+      alert(mockMessage);
+    });
+
+    window.addEventListener('load', loadPlan);
+  </script>
+</body>
+</html>
