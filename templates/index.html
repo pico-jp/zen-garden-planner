@@ -69,9 +69,10 @@
   <div class="layout">
     <div id="ui-panel">
       <h1>Zen Garden Planner</h1>
-      <button id="btnHorizontal">横線を書く</button>
-      <button id="btnCircle">大円を書く</button>
-      <button id="btnCluster">5つの円を書く</button>
+      <button id="btnHorizontal">横線を描く</button>
+      <button id="btnCircle">大円を描く</button>
+      <button id="btnCluster">小円を描く</button>
+      <button id="btnRock">岩を配置</button>
       <button id="btnSave">Python にプランを保存</button>
       <div id="stepList">ステップがまだありません。</div>
     </div>
@@ -84,6 +85,7 @@
     const btnHorizontal = document.getElementById('btnHorizontal');
     const btnCircle = document.getElementById('btnCircle');
     const btnCluster = document.getElementById('btnCluster');
+    const btnRock = document.getElementById('btnRock');
 
     function deactivateActionButton(button) {
       if (!button) return;
@@ -96,6 +98,7 @@
       if (types.has('horizontal')) deactivateActionButton(btnHorizontal);
       if (types.has('circle')) deactivateActionButton(btnCircle);
       if (types.has('cluster')) deactivateActionButton(btnCluster);
+      if (types.has('rock')) deactivateActionButton(btnRock);
     }
 
     function updateStepList() {
@@ -110,7 +113,9 @@
         } else if (step.type === 'circle') {
           return `${idx + 1}. 大円 (r: ${step.r || 100})`;
         } else if (step.type === 'cluster') {
-          return `${idx + 1}. 5円クラスター (r: ${step.r || 65})`;
+          return `${idx + 1}. 小円 (r: ${step.r || 65})`;
+        } else if (step.type === 'rock') {
+          return `${idx + 1}. 岩を配置`;
         }
         return `${idx + 1}. 未知のステップ`;
       }).join('<br>');
@@ -160,6 +165,13 @@
 
     btnCluster.addEventListener('click', (event) => {
       plan.steps.push({ type: 'cluster', r: 65 });
+      updateStepList();
+      redrawZen(plan);
+      deactivateActionButton(event.currentTarget);
+    });
+
+    btnRock.addEventListener('click', (event) => {
+      plan.steps.push({ type: 'rock' });
       updateStepList();
       redrawZen(plan);
       deactivateActionButton(event.currentTarget);

@@ -2,6 +2,7 @@ let heightMap = [];
 let rockImg = null;
 let rockLoaded = false;
 let rockError = false;
+let rockPlaced = false;
 let pg;
 let isReady = false;
 let pendingPlan = null;
@@ -46,10 +47,10 @@ function draw() {
   if (!pg) return;
   image(pg, 0, 0);
 
-  if (rockLoaded && rockImg) {
+  if (rockPlaced && rockLoaded && rockImg) {
     const size = 200;
     image(rockImg, width / 2 - size / 2, height / 2 - size / 2, size, size);
-  } else if (rockError) {
+  } else if (rockPlaced && rockError) {
     drawRockPlaceholder();
   }
 }
@@ -183,6 +184,7 @@ function redrawZen(plan) {
   }
 
   initializeSand();
+  rockPlaced = false;
 
   if (plan && Array.isArray(plan.steps)) {
     for (const step of plan.steps) {
@@ -194,6 +196,8 @@ function redrawZen(plan) {
       } else if (step.type === 'cluster') {
         const r = step.r ?? 65;
         carveCircleClusterFive(WIDTH / 2, HEIGHT / 2, r, step);
+      } else if (step.type === 'rock') {
+        rockPlaced = true;
       }
     }
   }
