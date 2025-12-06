@@ -165,8 +165,21 @@
       if (types.has('rock')) deactivateActionButton(btnRock);
     }
 
+    function updateRunButtonState() {
+      const hasSteps = plan.steps.length > 0;
+      btnRun.disabled = !hasSteps;
+      if (hasSteps) {
+        btnRun.classList.add('primary');
+        btnRun.classList.remove('deactivated');
+      } else {
+        btnRun.classList.remove('primary');
+        btnRun.classList.add('deactivated');
+      }
+    }
+
     function updateStepList() {
       const listDiv = document.getElementById('stepList');
+      updateRunButtonState();
       if (!plan.steps.length) {
         listDiv.textContent = 'No steps yet.';
         return;
@@ -186,6 +199,9 @@
 
       syncActionButtons();
     }
+
+    // Initialize Run button state on load.
+    updateRunButtonState();
 
     async function loadPlan() {
       try {
