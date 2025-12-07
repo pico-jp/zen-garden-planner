@@ -36,7 +36,11 @@ The app loads images from local paths so you can keep the binaries outside the r
   export ROCK_IMAGE_PATH="/Users/masahikon/work/251206_zen/rock.png"
   python app.py
   ```
-  If present, the browser loads it from the `/rock-image` endpoint; otherwise, the p5 sketch shows a placeholder shape.
+  If present, the browser loads it from the `/rock-image` endpoint; otherwise, the app falls back to an embedded base64 rock asset so you still see a stone in the preview without checking binaries into git. You can also provide a base64 string directly via `ROCK_IMAGE_BASE64` (omit the `data:` prefix):
+  ```bash
+  export ROCK_IMAGE_BASE64="<base64-string>"
+  python app.py
+  ```
 
 * Karesansui logo: set `KARESANSUI_IMAGE_PATH` before running the app.
   ```bash
