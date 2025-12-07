@@ -122,6 +122,7 @@
       <div id="stepList">No steps yet.</div>
       <button id="btnClear">Clear</button>
       <button id="btnRun" class="spacingA primary">Start ZenBot</button>
+      <button id="btnAutoRun" class="spacingA">Auto-Run ZenBot from Camera</button>
     </div>
     <div class="preview-area">
       <h1>ZenBot: The Zen Garden Maker</h1>
@@ -143,6 +144,14 @@
     const btnRock = document.getElementById('btnRock');
     const btnClear = document.getElementById('btnClear');
     const btnRun = document.getElementById('btnRun');
+    const btnAutoRun = document.getElementById('btnAutoRun');
+
+    const actionHandlers = {
+      draw_lines: async () => waitForMockAction('draw_lines'),
+      draw_large_circle: async () => waitForMockAction('draw_large_circle'),
+      draw_small_circles: async () => waitForMockAction('draw_small_circles'),
+      place_rock: async () => waitForMockAction('place_rock')
+    };
 
     const actionHandlers = {
       draw_lines: async () => waitForMockAction('draw_lines'),
@@ -174,7 +183,7 @@
     }
 
     function deactivateDuringExecution() {
-      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun].forEach((btn) => {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
         if (!btn) return;
         btn.disabled = true;
         btn.classList.add('deactivated');
@@ -189,6 +198,10 @@
       if (btnClear) {
         btnClear.disabled = false;
         btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
       }
     }
 
@@ -356,6 +369,17 @@
       if (!proceed) return;
 
       executePlanActions();
+    });
+
+    btnAutoRun.addEventListener('click', async () => {
+      if (isExecuting) return;
+      isExecuting = true;
+      deactivateDuringExecution();
+
+      await waitForMockAction('auto_run_from_camera');
+
+      isExecuting = false;
+      reactivateAfterExecution();
     });
 
     window.addEventListener('load', loadPlan);
