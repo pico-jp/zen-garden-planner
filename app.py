@@ -12,7 +12,7 @@ ROCK_IMAGE_PATH = os.environ.get(
     "ROCK_IMAGE_PATH", "/Users/masahikon/work/251206_zen/rock.png"
 )
 KARESANSUI_IMAGE_PATH = os.environ.get(
-    "KARESANSUI_IMAGE_PATH", "/Users/masahikon/work/251206_zen/karesansui.png"
+    "KARESANSUI_IMAGE_PATH", "/Users/masahikon/work/251206_zen/karesansui_in.png"
 )
 ROCK_IMAGE_BASE64 = os.environ.get("ROCK_IMAGE_BASE64")
 ROCK_BASE64_FILE = os.path.join(app.root_path, "static", "assets", "rock_base64.txt")
