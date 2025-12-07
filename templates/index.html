@@ -336,13 +336,19 @@
     btnRun.addEventListener('click', () => {
       if (!plan.steps.length) return;
 
-      plan.steps = optimizePlanSteps(plan.steps);
+      const originalStepsJson = JSON.stringify(plan.steps);
+      const optimizedSteps = optimizePlanSteps(plan.steps);
+      const wasChanged = originalStepsJson !== JSON.stringify(optimizedSteps);
+
+      plan.steps = optimizedSteps;
       updateStepList();
       if (typeof redrawZen === 'function') {
         redrawZen(plan);
       }
 
-      window.alert('Execution steps have been optimized. Press OK to continue.');
+      if (wasChanged) {
+        window.alert('The execution steps were optimized. Press OK to continue.');
+      }
 
       const proceed = window.confirm(
         'Please level the sand tray before starting. Press OK once the surface is ready.'
