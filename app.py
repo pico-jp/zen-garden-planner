@@ -1,6 +1,7 @@
 import base64
 import io
 import os
+from typing import Optional, Tuple
 from flask import Flask, abort, jsonify, render_template, request, send_file
 
 app = Flask(__name__)
@@ -14,6 +15,7 @@ KARESANSUI_IMAGE_PATH = os.environ.get(
     "KARESANSUI_IMAGE_PATH", "/Users/masahikon/work/251206_zen/karesansui.png"
 )
 ROCK_IMAGE_BASE64 = os.environ.get("ROCK_IMAGE_BASE64")
+ROCK_BASE64_FILE = os.path.join(app.root_path, "static", "assets", "rock_base64.txt")
 
 # Inline SVG fallback (base64) so the app always has a rock asset without
 # committing binaries. Replace ROCK_IMAGE_BASE64 or ROCK_IMAGE_PATH to supply a
@@ -56,23 +58,61 @@ def update_plan():
     return jsonify({"status": "ok", "plan": CURRENT_PLAN})
 
 
+def _load_base64_from_file(path: Optional[str]) -> Optional[str]:
+    if not path or not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return None
+
+
+def _decode_base64_payload(payload: Optional[str]) -> Tuple[Optional[io.BytesIO], Optional[str]]:
+    """Return (BytesIO, mimetype) for a given base64 payload."""
+
+    if not payload:
+        return None, None
+
+    mimetype = "image/png"
+    cleaned = payload
+
+    if payload.startswith("data:image"):
+        try:
+            header, encoded = payload.split(",", 1)
+            cleaned = encoded
+            if ";" in header:
+                mimetype = header.split(":", 1)[1].split(";", 1)[0]
+            else:
+                mimetype = header.split(":", 1)[1]
+        except ValueError:
+            return None, None
+    elif payload == DEFAULT_ROCK_SVG_BASE64:
+        mimetype = "image/svg+xml"
+    elif ROCK_IMAGE_BASE64:
+        mimetype = "image/png"
+
+    try:
+        data = base64.b64decode(cleaned)
+    except (ValueError, TypeError):
+        return None, None
+
+    buffer = io.BytesIO(data)
+    buffer.seek(0)
+    return buffer, mimetype
+
+
 @app.route("/rock-image")
 def rock_image():
-    """Serve a rock image from a local path or built-in base64 fallback."""
+    """Serve a rock image from a local path or built-in/base64 fallback."""
 
     if ROCK_IMAGE_PATH and os.path.exists(ROCK_IMAGE_PATH):
         return send_file(ROCK_IMAGE_PATH, mimetype="image/png")
 
-    payload = ROCK_IMAGE_BASE64 or DEFAULT_ROCK_SVG_BASE64
-    if payload:
-        try:
-            data = base64.b64decode(payload.split(",")[-1])
-        except (ValueError, TypeError):
-            abort(404)
-        buffer = io.BytesIO(data)
-        buffer.seek(0)
-        # Default fallback is an SVG asset.
-        return send_file(buffer, mimetype="image/svg+xml")
+    payload = ROCK_IMAGE_BASE64 or _load_base64_from_file(ROCK_BASE64_FILE) or DEFAULT_ROCK_SVG_BASE64
+    buffer, mimetype = _decode_base64_payload(payload)
+    if buffer and mimetype:
+        return send_file(buffer, mimetype=mimetype)
 
     abort(404)
 

@@ -42,6 +42,7 @@ The app loads images from local paths so you can keep the binaries outside the r
   export ROCK_IMAGE_BASE64="<base64-string>"
   python app.py
   ```
+  Another zero-config option is to drop your base64 string into `static/assets/rock_base64.txt`; the server will read that file automatically if `ROCK_IMAGE_PATH` and `ROCK_IMAGE_BASE64` are unset. The committed file contains a placeholder rock so the preview still renders without any local setup.
 
 * Karesansui logo: set `KARESANSUI_IMAGE_PATH` before running the app.
   ```bash
