@@ -37,12 +37,12 @@ The app loads images from local paths so you can keep the binaries outside the r
   export ROCK_IMAGE_PATH="/Users/masahikon/work/251206_zen/rock.png"
   python app.py
   ```
-  If present, the browser loads it from the `/rock-image` endpoint; otherwise, the app falls back to an embedded base64 rock asset so you still see a stone in the preview without checking binaries into git. You can also provide a base64 string directly via `ROCK_IMAGE_BASE64` (omit the `data:` prefix):
+  If present, the browser loads it from the `/rock-image` endpoint; otherwise, the app falls back to the bundled base64 rock asset (`static/assets/rock_base64.txt`) so you still see a stone in the preview without checking binaries into git. You can also provide a base64 string directly via `ROCK_IMAGE_BASE64` (omit the `data:` prefix):
   ```bash
   export ROCK_IMAGE_BASE64="<base64-string>"
   python app.py
   ```
-  Another zero-config option is to drop your base64 string into `static/assets/rock_base64.txt`; the server will read that file automatically if `ROCK_IMAGE_PATH` and `ROCK_IMAGE_BASE64` are unset. The committed file contains a placeholder rock so the preview still renders without any local setup.
+  Another zero-config option is to drop your base64 string into `static/assets/rock_base64.txt`; the server will read that file automatically if `ROCK_IMAGE_PATH` and `ROCK_IMAGE_BASE64` are unset. The committed file is expected to hold the latest shared base64 rock; update it locally if you prefer a different stone.
 
 * Karesansui logo: set `KARESANSUI_IMAGE_PATH` before running the app.
   ```bash
