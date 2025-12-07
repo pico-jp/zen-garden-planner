@@ -17,24 +17,6 @@ KARESANSUI_IMAGE_PATH = os.environ.get(
 ROCK_IMAGE_BASE64 = os.environ.get("ROCK_IMAGE_BASE64")
 ROCK_BASE64_FILE = os.path.join(app.root_path, "static", "assets", "rock_base64.txt")
 
-# Inline SVG fallback (base64) so the app always has a rock asset without
-# committing binaries. Replace ROCK_IMAGE_BASE64 or ROCK_IMAGE_PATH to supply a
-# custom image (like the provided rock.png) while keeping the repo text-only.
-DEFAULT_ROCK_SVG_BASE64 = (
-    "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2Ii"
-    "B2aWV3Qm94PSIwIDAgMjU2IDI1NiI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIw"
-    "IiB4Mj0iMSIgeTE9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2I3Yjli"
-    "NyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjUwJSIgc3RvcC1jb2xvcj0iI2E0YTZhNCIvPgogICAgICA8c3RvcCBv"
-    "ZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM4YjhmOGMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZz"
-    "PgogIDxyZWN0IHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiBmaWxsPSJyZ2JhKDAsMCwwLDApIi8+CiAgPHBhdGgg"
-    "ZmlsbD0idXJsKCNnKSIgc3Ryb2tlPSIjNmU2ZjZlIiBzdHJva2Utd2lkdGg9IjMiIGQ9Ik03NiA2MGMyOC0xOCA1"
-    "NC0yNiA4Mi04IDE4IDEwIDMwIDIzIDM0IDQwIDQgMTgtMiAzMS02IDQ2LTUgMjAtMjAgMzYtMzggNDYtMTYgMTAt"
-    "NDYgMTgtNzQgNi0yMi0xMC00Mi0zOC00Mi02NCAwLTIwIDE2LTQ2IDQ0LTY2eiIvPgogIDxwYXRoIGZpbGw9InJn"
-    "YmEoMjU1LDI1NSwyNTUsMC4xNCkiIGQ9Ik0xMDAgNzRjMTItMTAgMzYtMTYgNTYtOCAxOCA3IDMyIDIyIDMyIDM4"
-    "IDAgOC00IDEwLTEwIDYtMTItOC0yNC0xNC00Mi0xNC0yMCAwLTM0LTgtNDAtMTYtMi0yIDAtNCA0LTZ6Ii8+Cjwv"
-    "c3ZnPgo="
-)
-
 
 @app.route("/")
 def index():
@@ -87,10 +69,6 @@ def _decode_base64_payload(payload: Optional[str]) -> Tuple[Optional[io.BytesIO]
                 mimetype = header.split(":", 1)[1]
         except ValueError:
             return None, None
-    elif payload == DEFAULT_ROCK_SVG_BASE64:
-        mimetype = "image/svg+xml"
-    elif ROCK_IMAGE_BASE64:
-        mimetype = "image/png"
 
     try:
         data = base64.b64decode(cleaned)
@@ -109,7 +87,7 @@ def rock_image():
     if ROCK_IMAGE_PATH and os.path.exists(ROCK_IMAGE_PATH):
         return send_file(ROCK_IMAGE_PATH, mimetype="image/png")
 
-    payload = ROCK_IMAGE_BASE64 or _load_base64_from_file(ROCK_BASE64_FILE) or DEFAULT_ROCK_SVG_BASE64
+    payload = ROCK_IMAGE_BASE64 or _load_base64_from_file(ROCK_BASE64_FILE)
     buffer, mimetype = _decode_base64_payload(payload)
     if buffer and mimetype:
         return send_file(buffer, mimetype=mimetype)
