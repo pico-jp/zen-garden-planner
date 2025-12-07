@@ -31,7 +31,7 @@ A minimal Flask + p5.js demo for visualizing Zen garden plans with interactive r
 ## Local images (rock and karesansui logo)
 The app loads images from local paths so you can keep the binaries outside the repository.
 
-* Rock: set `ROCK_IMAGE_PATH` before running the app.
+* Rock: download your preferred rock image (including the one you shared) somewhere on your machine and set `ROCK_IMAGE_PATH` before running the app. Binaries are not committed to this repo, so you need to point the app at your local file.
   ```bash
   export ROCK_IMAGE_PATH="/Users/masahikon/work/251206_zen/rock.png"
   python app.py
