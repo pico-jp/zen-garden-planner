@@ -316,6 +316,11 @@
     }
 
     btnRun.addEventListener('click', () => {
+      const proceed = window.confirm(
+        'Please level the sand tray before starting. Press OK once the surface is ready.'
+      );
+      if (!proceed) return;
+
       executePlanActions();
     });
 
