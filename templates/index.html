@@ -153,6 +153,13 @@
       place_rock: async () => waitForMockAction('place_rock')
     };
 
+    const actionHandlers = {
+      draw_lines: async () => waitForMockAction('draw_lines'),
+      draw_large_circle: async () => waitForMockAction('draw_large_circle'),
+      draw_small_circles: async () => waitForMockAction('draw_small_circles'),
+      place_rock: async () => waitForMockAction('place_rock')
+    };
+
     function deactivateActionButton(button) {
       if (!button) return;
       button.disabled = true;
