@@ -8,9 +8,6 @@ app = Flask(__name__)
 
 CURRENT_PLAN = {"steps": []}
 
-ROCK_IMAGE_PATH = os.environ.get(
-    "ROCK_IMAGE_PATH", "/Users/masahikon/work/251206_zen/rock.png"
-)
 ROCK_IMAGE_BASE64 = os.environ.get("ROCK_IMAGE_BASE64")
 ROCK_BASE64_FILE = os.path.join(app.root_path, "static", "assets", "rock_base64.txt")
 KARESANSUI_IMAGE_BASE64 = os.environ.get("KARESANSUI_IMAGE_BASE64")
@@ -83,10 +80,7 @@ def _decode_base64_payload(payload: Optional[str]) -> Tuple[Optional[io.BytesIO]
 
 @app.route("/rock-image")
 def rock_image():
-    """Serve a rock image from a local path or built-in/base64 fallback."""
-
-    if ROCK_IMAGE_PATH and os.path.exists(ROCK_IMAGE_PATH):
-        return send_file(ROCK_IMAGE_PATH, mimetype="image/png")
+    """Serve a rock image from the committed/base64 payload."""
 
     payload = ROCK_IMAGE_BASE64 or _load_base64_from_file(ROCK_BASE64_FILE)
     buffer, mimetype = _decode_base64_payload(payload)

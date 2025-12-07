@@ -27,24 +27,19 @@ A minimal Flask + p5.js demo for visualizing Zen garden plans with interactive r
 - `templates/index.html` — UI layout, buttons for adding steps, and plan save/load hooks.
 - `static/sketch.js` — p5.js sketch that renders sand shading and applies rake patterns from the plan.
 - `static/assets/` — optional local-only storage for image assets (e.g., rock or logo files) you do not want to commit; pair with the environment variables below or update the bundled base64 text sources.
-- `static/rock.png` — optional transparent PNG used as the garden rock (not committed to avoid binary attachment warnings). If absent, the p5 sketch renders a placeholder shape instead.
+  The committed base64 sources keep binaries out of version control while still allowing you to bundle the latest assets.
 
 ## Local images (rock and karesansui logo)
-The app loads images from local paths or committed base64 text files so you can keep binaries out of the repository.
+The app loads images from committed base64 text files so you can keep binaries out of the repository.
 
-* Rock: download your preferred rock image (including the one you shared) somewhere on your machine and set `ROCK_IMAGE_PATH` before running the app. Binaries are not committed to this repo, so you need to point the app at your local file.
-  ```bash
-  export ROCK_IMAGE_PATH="/Users/masahikon/work/251206_zen/rock.png"
-  python app.py
-  ```
-  If present, the browser loads it from the `/rock-image` endpoint; otherwise, the app falls back to the bundled base64 rock asset (`static/assets/rock_base64.txt`) so you still see a stone in the preview without checking binaries into git. You can also provide a base64 string directly via `ROCK_IMAGE_BASE64` (omit the `data:` prefix):
+* Rock: served from the bundled base64 rock asset (`static/assets/rock_base64.txt`). You can also provide a base64 string directly via `ROCK_IMAGE_BASE64` (with or without a `data:` prefix):
   ```bash
   export ROCK_IMAGE_BASE64="<base64-string>"
   python app.py
   ```
-  Another zero-config option is to drop your base64 string into `static/assets/rock_base64.txt`; the server will read that file automatically if `ROCK_IMAGE_PATH` and `ROCK_IMAGE_BASE64` are unset. The committed file is expected to hold the latest shared base64 rock; update it locally if you prefer a different stone.
+  Another option is to drop your base64 string into `static/assets/rock_base64.txt`; the server will read that file automatically. The committed file is expected to hold the latest shared base64 rock; update it locally if you prefer a different stone.
 
 * Karesansui logo: served from the committed base64 payload at `static/assets/karesansui_base64.txt`. Update that file locally to swap the logo without shipping binaries. You may also override the payload via `KARESANSUI_IMAGE_BASE64` (with or without a `data:image/png;base64,` prefix) to test alternate logos without editing the file. The `/karesansui-image` endpoint reads whichever payload is available and displays it beneath the preview title.
 
-You can also drop images into `static/assets/` and point the environment variables at those files for the rock if you prefer keeping assets next to the project without committing binaries.
+You can also drop updated base64 text files into `static/assets/` if you prefer keeping assets next to the project without committing binaries.
 
