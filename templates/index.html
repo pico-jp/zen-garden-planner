@@ -43,10 +43,10 @@
       background: #2563eb;
     }
     #ui-panel button.primary {
-      background: #ef4444;
+      background: #3b82f6;
     }
     #ui-panel button.primary:hover {
-      background: #dc2626;
+      background: #2563eb;
     }
     #ui-panel button:disabled,
     #ui-panel button.deactivated {
@@ -121,7 +121,9 @@
       <h2 class="spacingB">Steps</h2>
       <div id="stepList">No steps yet.</div>
       <button id="btnClear">Clear</button>
-      <button id="btnRun" class="spacingA primary">Start ZenBot</button>
+      <h2 class="spacingB">Run</h2>
+      <button id="btnRun" class="primary">Start ZenBot</button>
+      <button id="btnAutoRun">Auto-Run ZenBot from Camera</button>
     </div>
     <div class="preview-area">
       <h1>ZenBot: The Zen Garden Maker</h1>
@@ -136,12 +138,23 @@
   <script src="/static/sketch.js"></script>
   <script>
     let plan = { steps: [] };
+    let isExecuting = false;
     const btnHorizontal = document.getElementById('btnHorizontal');
     const btnCircle = document.getElementById('btnCircle');
     const btnCluster = document.getElementById('btnCluster');
     const btnRock = document.getElementById('btnRock');
     const btnClear = document.getElementById('btnClear');
     const btnRun = document.getElementById('btnRun');
+    const btnAutoRun = document.getElementById('btnAutoRun');
+
+    const actionHandlers = {
+      draw_lines: async () => waitForMockAction('draw_lines'),
+      draw_large_circle: async () => waitForMockAction('draw_large_circle'),
+      draw_small_circles: async () => waitForMockAction('draw_small_circles'),
+      place_rock: async () => waitForMockAction('place_rock')
+    };
+
+    const permanentlyDisabledButtons = new Set([btnCircle, btnCluster]);
 
     function deactivateActionButton(button) {
       if (!button) return;
@@ -150,19 +163,45 @@
     }
 
     function reactivateActionButtons() {
-      [btnHorizontal, btnCircle, btnCluster, btnRock].forEach((btn) => {
+      [btnHorizontal, btnRock].forEach((btn) => {
         if (!btn) return;
         btn.disabled = false;
         btn.classList.remove('deactivated');
+      });
+      permanentlyDisabledButtons.forEach((btn) => {
+        if (!btn) return;
+        deactivateActionButton(btn);
       });
     }
 
     function syncActionButtons() {
       const types = new Set(plan.steps.map(step => step.type));
       if (types.has('horizontal')) deactivateActionButton(btnHorizontal);
-      if (types.has('circle')) deactivateActionButton(btnCircle);
-      if (types.has('cluster')) deactivateActionButton(btnCluster);
       if (types.has('rock')) deactivateActionButton(btnRock);
+      permanentlyDisabledButtons.forEach((btn) => deactivateActionButton(btn));
+    }
+
+    function deactivateDuringExecution() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.classList.remove('primary');
+      });
+    }
+
+    function reactivateAfterExecution() {
+      reactivateActionButtons();
+      syncActionButtons();
+      updateRunButtonState();
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
+      }
     }
 
     function updateRunButtonState() {
@@ -174,6 +213,11 @@
       } else {
         btnRun.classList.remove('primary');
         btnRun.classList.add('deactivated');
+      }
+      if (isExecuting) {
+        btnRun.disabled = true;
+        btnRun.classList.add('deactivated');
+        btnRun.classList.remove('primary');
       }
     }
 
@@ -202,6 +246,17 @@
 
     // Initialize Run button state on load.
     updateRunButtonState();
+    hideNonDemoActions();
+
+    function hideNonDemoActions() {
+      permanentlyDisabledButtons.forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.setAttribute('aria-hidden', 'true');
+        btn.style.display = 'none';
+      });
+    }
 
     async function loadPlan() {
       try {
@@ -251,12 +306,106 @@
       reactivateActionButtons();
     });
 
+    function buildActionSequence() {
+      return plan.steps.map((step) => {
+        if (step.type === 'horizontal') return 'draw_lines';
+        if (step.type === 'circle') return 'draw_large_circle';
+        if (step.type === 'cluster') return 'draw_small_circles';
+        if (step.type === 'rock') return 'place_rock';
+        return null;
+      }).filter(Boolean);
+    }
+
+    function optimizePlanSteps(steps) {
+      const nextSteps = [...steps];
+
+      const linesIndex = nextSteps.findIndex((step) => step.type === 'horizontal');
+      if (linesIndex > 0) {
+        const [linesStep] = nextSteps.splice(linesIndex, 1);
+        nextSteps.unshift(linesStep);
+      }
+
+      const rockIndex = nextSteps.findIndex((step) => step.type === 'rock');
+      if (rockIndex !== -1 && rockIndex !== nextSteps.length - 1) {
+        const [rockStep] = nextSteps.splice(rockIndex, 1);
+        nextSteps.push(rockStep);
+      }
+
+      return nextSteps;
+    }
+
+    async function waitForMockAction(actionName) {
+      console.log(`Executing action: ${actionName}`);
+      return new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    async function executePlanActions() {
+      if (isExecuting || !plan.steps.length) return;
+      isExecuting = true;
+      deactivateDuringExecution();
+
+      try {
+        const sequence = buildActionSequence();
+        for (const actionName of sequence) {
+          const handler = actionHandlers[actionName];
+          if (handler) {
+            await handler();
+          }
+        }
+      } catch (err) {
+        console.error('Failed to execute plan actions', err);
+        window.alert('An error interrupted ZenBot. Please try again.');
+      } finally {
+        isExecuting = false;
+        reactivateAfterExecution();
+      }
+    }
+
+    function confirmSurfaceReady() {
+      return window.confirm(
+        'Please level the sand tray before starting. Press OK once the surface is ready.'
+      );
+    }
+
     btnRun.addEventListener('click', () => {
-      const mockMessage = plan.steps.length
-        ? `Start ZenBot (mock): Executing ${plan.steps.length} step(s) in order.`
-        : 'Start ZenBot (mock): No steps to execute.';
-      console.log(mockMessage);
-      alert(mockMessage);
+      if (!plan.steps.length) return;
+
+      const originalStepsJson = JSON.stringify(plan.steps);
+      const optimizedSteps = optimizePlanSteps(plan.steps);
+      const wasChanged = originalStepsJson !== JSON.stringify(optimizedSteps);
+
+      plan.steps = optimizedSteps;
+      updateStepList();
+      if (typeof redrawZen === 'function') {
+        redrawZen(plan);
+      }
+
+      if (wasChanged) {
+        window.alert('The execution steps were optimized. Press OK to continue.');
+      }
+
+      if (!confirmSurfaceReady()) return;
+
+      executePlanActions();
+    });
+
+    btnAutoRun.addEventListener('click', async () => {
+      if (isExecuting) return;
+
+      if (!confirmSurfaceReady()) return;
+
+      isExecuting = true;
+      deactivateDuringExecution();
+
+      try {
+        await waitForMockAction('auto_run_from_camera');
+      } catch (err) {
+        console.error('Failed to auto-run from camera', err);
+        window.alert('Auto-run from camera was interrupted. Please try again.');
+      } finally {
+        isExecuting = false;
+        reactivateAfterExecution();
+      }
     });
 
     window.addEventListener('load', loadPlan);
