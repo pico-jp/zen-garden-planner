@@ -153,13 +153,6 @@
       place_rock: async () => waitForMockAction('place_rock')
     };
 
-    const actionHandlers = {
-      draw_lines: async () => waitForMockAction('draw_lines'),
-      draw_large_circle: async () => waitForMockAction('draw_large_circle'),
-      draw_small_circles: async () => waitForMockAction('draw_small_circles'),
-      place_rock: async () => waitForMockAction('place_rock')
-    };
-
     function deactivateActionButton(button) {
       if (!button) return;
       button.disabled = true;
@@ -334,16 +327,21 @@
       isExecuting = true;
       deactivateDuringExecution();
 
-      const sequence = buildActionSequence();
-      for (const actionName of sequence) {
-        const handler = actionHandlers[actionName];
-        if (handler) {
-          await handler();
+      try {
+        const sequence = buildActionSequence();
+        for (const actionName of sequence) {
+          const handler = actionHandlers[actionName];
+          if (handler) {
+            await handler();
+          }
         }
+      } catch (err) {
+        console.error('Failed to execute plan actions', err);
+        window.alert('An error interrupted ZenBot. Please try again.');
+      } finally {
+        isExecuting = false;
+        reactivateAfterExecution();
       }
-
-      isExecuting = false;
-      reactivateAfterExecution();
     }
 
     btnRun.addEventListener('click', () => {
@@ -376,10 +374,15 @@
       isExecuting = true;
       deactivateDuringExecution();
 
-      await waitForMockAction('auto_run_from_camera');
-
-      isExecuting = false;
-      reactivateAfterExecution();
+      try {
+        await waitForMockAction('auto_run_from_camera');
+      } catch (err) {
+        console.error('Failed to auto-run from camera', err);
+        window.alert('Auto-run from camera was interrupted. Please try again.');
+      } finally {
+        isExecuting = false;
+        reactivateAfterExecution();
+      }
     });
 
     window.addEventListener('load', loadPlan);
