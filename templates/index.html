@@ -293,6 +293,24 @@
       }).filter(Boolean);
     }
 
+    function optimizePlanSteps(steps) {
+      const nextSteps = [...steps];
+
+      const linesIndex = nextSteps.findIndex((step) => step.type === 'horizontal');
+      if (linesIndex > 0) {
+        const [linesStep] = nextSteps.splice(linesIndex, 1);
+        nextSteps.unshift(linesStep);
+      }
+
+      const rockIndex = nextSteps.findIndex((step) => step.type === 'rock');
+      if (rockIndex !== -1 && rockIndex !== nextSteps.length - 1) {
+        const [rockStep] = nextSteps.splice(rockIndex, 1);
+        nextSteps.push(rockStep);
+      }
+
+      return nextSteps;
+    }
+
     async function waitForMockAction(actionName) {
       console.log(`Executing action: ${actionName}`);
       return new Promise((resolve) => setTimeout(resolve, 1000));
@@ -316,6 +334,16 @@
     }
 
     btnRun.addEventListener('click', () => {
+      if (!plan.steps.length) return;
+
+      plan.steps = optimizePlanSteps(plan.steps);
+      updateStepList();
+      if (typeof redrawZen === 'function') {
+        redrawZen(plan);
+      }
+
+      window.alert('Execution steps have been optimized. Press OK to continue.');
+
       const proceed = window.confirm(
         'Please level the sand tray before starting. Press OK once the surface is ready.'
       );
