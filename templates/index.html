@@ -172,10 +172,14 @@
     }
 
     function reactivateActionButtons() {
-      [btnHorizontal, btnCircle, btnCluster, btnRock].forEach((btn) => {
+      [btnHorizontal, btnRock].forEach((btn) => {
         if (!btn) return;
         btn.disabled = false;
         btn.classList.remove('deactivated');
+      });
+      permanentlyDisabledButtons.forEach((btn) => {
+        if (!btn) return;
+        deactivateActionButton(btn);
       });
     }
 
@@ -183,6 +187,122 @@
       const types = new Set(plan.steps.map(step => step.type));
       if (types.has('horizontal')) deactivateActionButton(btnHorizontal);
       if (types.has('rock')) deactivateActionButton(btnRock);
+      permanentlyDisabledButtons.forEach((btn) => deactivateActionButton(btn));
+    }
+
+    function deactivateDuringExecution() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.classList.remove('primary');
+      });
+    }
+
+    function reactivateAfterExecution() {
+      reactivateActionButtons();
+      syncActionButtons();
+      updateRunButtonState();
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
+      }
+    }
+
+    function deactivateDuringExecution() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.classList.remove('primary');
+      });
+    }
+
+    function reactivateAfterExecution() {
+      reactivateActionButtons();
+      syncActionButtons();
+      updateRunButtonState();
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
+      }
+    }
+
+    function deactivateDuringExecution() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.classList.remove('primary');
+      });
+    }
+
+    function reactivateAfterExecution() {
+      reactivateActionButtons();
+      syncActionButtons();
+      updateRunButtonState();
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
+      }
+    }
+
+    function deactivateDuringExecution() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.classList.remove('primary');
+      });
+    }
+
+    function reactivateAfterExecution() {
+      reactivateActionButtons();
+      syncActionButtons();
+      updateRunButtonState();
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
+      }
+    }
+
+    function deactivateDuringExecution() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.classList.remove('primary');
+      });
+    }
+
+    function reactivateAfterExecution() {
+      reactivateActionButtons();
+      syncActionButtons();
+      updateRunButtonState();
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
+      }
     }
 
     function deactivateDuringExecution() {
