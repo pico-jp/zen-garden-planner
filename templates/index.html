@@ -139,13 +139,13 @@
   <script>
     let plan = { steps: [] };
     let isExecuting = false;
-    const btnHorizontal = document.getElementById('btnHorizontal');
-    const btnCircle = document.getElementById('btnCircle');
-    const btnCluster = document.getElementById('btnCluster');
-    const btnRock = document.getElementById('btnRock');
-    const btnClear = document.getElementById('btnClear');
-    const btnRun = document.getElementById('btnRun');
-    const btnAutoRun = document.getElementById('btnAutoRun');
+    let btnHorizontal;
+    let btnCircle;
+    let btnCluster;
+    let btnRock;
+    let btnClear;
+    let btnRun;
+    let btnAutoRun;
 
     const actionHandlers = {
       draw_lines: async () => waitForMockAction('draw_lines'),
@@ -153,6 +153,16 @@
       draw_small_circles: async () => waitForMockAction('draw_small_circles'),
       place_rock: async () => waitForMockAction('place_rock')
     };
+
+    function cacheButtons() {
+      btnHorizontal = document.getElementById('btnHorizontal');
+      btnCircle = document.getElementById('btnCircle');
+      btnCluster = document.getElementById('btnCluster');
+      btnRock = document.getElementById('btnRock');
+      btnClear = document.getElementById('btnClear');
+      btnRun = document.getElementById('btnRun');
+      btnAutoRun = document.getElementById('btnAutoRun');
+    }
 
     function deactivateActionButton(button) {
       if (!button) return;
@@ -225,7 +235,31 @@
       }
     }
 
+    function deactivateDuringExecution() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.classList.remove('primary');
+      });
+    }
+
+    function reactivateAfterExecution() {
+      reactivateActionButtons();
+      syncActionButtons();
+      updateRunButtonState();
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
+      }
+    }
+
     function updateRunButtonState() {
+      if (!btnRun) return;
       const hasSteps = plan.steps.length > 0;
       btnRun.disabled = !hasSteps;
       if (hasSteps) {
@@ -265,20 +299,6 @@
       syncActionButtons();
     }
 
-    // Initialize Run button state on load.
-    updateRunButtonState();
-    hideNonDemoActions();
-
-    function hideNonDemoActions() {
-      permanentlyDisabledButtons.forEach((btn) => {
-        if (!btn) return;
-        btn.disabled = true;
-        btn.classList.add('deactivated');
-        btn.setAttribute('aria-hidden', 'true');
-        btn.style.display = 'none';
-      });
-    }
-
     async function loadPlan() {
       try {
         const res = await fetch('/api/plan');
@@ -292,40 +312,52 @@
       }
     }
 
-    btnHorizontal.addEventListener('click', (event) => {
-      plan.steps.push({ type: 'horizontal', numLines: 36 });
-      updateStepList();
-      redrawZen(plan);
-      deactivateActionButton(event.currentTarget);
-    });
+    function wireActionButtons() {
+      if (btnHorizontal) {
+        btnHorizontal.addEventListener('click', (event) => {
+          plan.steps.push({ type: 'horizontal', numLines: 36 });
+          updateStepList();
+          redrawZen(plan);
+          deactivateActionButton(event.currentTarget);
+        });
+      }
 
-    btnCircle.addEventListener('click', (event) => {
-      plan.steps.push({ type: 'circle', r: 100 });
-      updateStepList();
-      redrawZen(plan);
-      deactivateActionButton(event.currentTarget);
-    });
+      if (btnCircle) {
+        btnCircle.addEventListener('click', (event) => {
+          plan.steps.push({ type: 'circle', r: 100 });
+          updateStepList();
+          redrawZen(plan);
+          deactivateActionButton(event.currentTarget);
+        });
+      }
 
-    btnCluster.addEventListener('click', (event) => {
-      plan.steps.push({ type: 'cluster', r: 65 });
-      updateStepList();
-      redrawZen(plan);
-      deactivateActionButton(event.currentTarget);
-    });
+      if (btnCluster) {
+        btnCluster.addEventListener('click', (event) => {
+          plan.steps.push({ type: 'cluster', r: 65 });
+          updateStepList();
+          redrawZen(plan);
+          deactivateActionButton(event.currentTarget);
+        });
+      }
 
-    btnRock.addEventListener('click', (event) => {
-      plan.steps.push({ type: 'rock' });
-      updateStepList();
-      redrawZen(plan);
-      deactivateActionButton(event.currentTarget);
-    });
+      if (btnRock) {
+        btnRock.addEventListener('click', (event) => {
+          plan.steps.push({ type: 'rock' });
+          updateStepList();
+          redrawZen(plan);
+          deactivateActionButton(event.currentTarget);
+        });
+      }
 
-    btnClear.addEventListener('click', () => {
-      plan = { steps: [] };
-      updateStepList();
-      redrawZen(plan);
-      reactivateActionButtons();
-    });
+      if (btnClear) {
+        btnClear.addEventListener('click', () => {
+          plan = { steps: [] };
+          updateStepList();
+          redrawZen(plan);
+          reactivateActionButtons();
+        });
+      }
+    }
 
     function buildActionSequence() {
       return plan.steps.map((step) => {
@@ -388,48 +420,62 @@
       );
     }
 
-    btnRun.addEventListener('click', () => {
-      if (!plan.steps.length) return;
+    function wireRunButtons() {
+      if (btnRun) {
+        btnRun.addEventListener('click', () => {
+          if (!plan.steps.length) return;
 
-      const originalStepsJson = JSON.stringify(plan.steps);
-      const optimizedSteps = optimizePlanSteps(plan.steps);
-      const wasChanged = originalStepsJson !== JSON.stringify(optimizedSteps);
+          const originalStepsJson = JSON.stringify(plan.steps);
+          const optimizedSteps = optimizePlanSteps(plan.steps);
+          const wasChanged = originalStepsJson !== JSON.stringify(optimizedSteps);
 
-      plan.steps = optimizedSteps;
-      updateStepList();
-      if (typeof redrawZen === 'function') {
-        redrawZen(plan);
+          plan.steps = optimizedSteps;
+          updateStepList();
+          if (typeof redrawZen === 'function') {
+            redrawZen(plan);
+          }
+
+          if (wasChanged) {
+            window.alert('The execution steps were optimized. Press OK to continue.');
+          }
+
+          if (!confirmSurfaceReady()) return;
+
+          executePlanActions();
+        });
       }
 
-      if (wasChanged) {
-        window.alert('The execution steps were optimized. Press OK to continue.');
+      if (btnAutoRun) {
+        btnAutoRun.addEventListener('click', async () => {
+          if (isExecuting) return;
+
+          if (!confirmSurfaceReady()) return;
+
+          isExecuting = true;
+          deactivateDuringExecution();
+
+          try {
+            await waitForMockAction('auto_run_from_camera');
+          } catch (err) {
+            console.error('Failed to auto-run from camera', err);
+            window.alert('Auto-run from camera was interrupted. Please try again.');
+          } finally {
+            isExecuting = false;
+            reactivateAfterExecution();
+          }
+        });
       }
+    }
 
-      if (!confirmSurfaceReady()) return;
+    function initUi() {
+      cacheButtons();
+      updateRunButtonState();
+      wireActionButtons();
+      wireRunButtons();
+      loadPlan();
+    }
 
-      executePlanActions();
-    });
-
-    btnAutoRun.addEventListener('click', async () => {
-      if (isExecuting) return;
-
-      if (!confirmSurfaceReady()) return;
-
-      isExecuting = true;
-      deactivateDuringExecution();
-
-      try {
-        await waitForMockAction('auto_run_from_camera');
-      } catch (err) {
-        console.error('Failed to auto-run from camera', err);
-        window.alert('Auto-run from camera was interrupted. Please try again.');
-      } finally {
-        isExecuting = false;
-        reactivateAfterExecution();
-      }
-    });
-
-    window.addEventListener('load', loadPlan);
+    window.addEventListener('DOMContentLoaded', initUi);
   </script>
 </body>
 </html>
