@@ -146,6 +146,7 @@
     let btnClear;
     let btnRun;
     let btnAutoRun;
+    let renderRetry = null;
 
     const actionHandlers = {
       draw_lines: async () => waitForMockAction('draw_lines'),
@@ -281,6 +282,29 @@
       }
     }
 
+    function deactivateDuringExecution() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.classList.remove('primary');
+      });
+    }
+
+    function reactivateAfterExecution() {
+      reactivateActionButtons();
+      syncActionButtons();
+      updateRunButtonState();
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
+      }
+    }
+
     function updateRunButtonState() {
       if (!btnRun) return;
       const hasSteps = plan.steps.length > 0;
@@ -302,8 +326,26 @@
     function renderPreview() {
       if (typeof redrawZen === 'function') {
         redrawZen(plan);
+        return;
+      }
+
+      if (!renderRetry) {
+        renderRetry = setInterval(() => {
+          if (typeof redrawZen !== 'function') return;
+          clearInterval(renderRetry);
+          renderRetry = null;
+          redrawZen(plan);
+        }, 100);
       }
     }
+
+    window.addEventListener('zen-sketch-ready', () => {
+      if (renderRetry) {
+        clearInterval(renderRetry);
+        renderRetry = null;
+      }
+      renderPreview();
+    });
 
     function updateStepList() {
       const listDiv = document.getElementById('stepList');
