@@ -305,6 +305,29 @@
       }
     }
 
+    function deactivateDuringExecution() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.classList.remove('primary');
+      });
+    }
+
+    function reactivateAfterExecution() {
+      reactivateActionButtons();
+      syncActionButtons();
+      updateRunButtonState();
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
+      }
+    }
+
     function updateRunButtonState() {
       if (!btnRun) return;
       const hasSteps = plan.steps.length > 0;
@@ -324,8 +347,12 @@
     }
 
     function renderPreview() {
+      const planPayload = { ...plan, steps: [...plan.steps] };
+
+      window.dispatchEvent(new CustomEvent('zen-plan-update', { detail: planPayload }));
+
       if (typeof redrawZen === 'function') {
-        redrawZen(plan);
+        redrawZen(planPayload);
         return;
       }
 
@@ -334,7 +361,7 @@
           if (typeof redrawZen !== 'function') return;
           clearInterval(renderRetry);
           renderRetry = null;
-          redrawZen(plan);
+          redrawZen(planPayload);
         }, 100);
       }
     }
