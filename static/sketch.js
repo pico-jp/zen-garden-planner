@@ -6,6 +6,7 @@ let rockPlaced = false;
 let pg;
 let isReady = false;
 let pendingPlan = null;
+let latestPlan = null;
 
 const DEFAULT_ROCK_DATA_URL =
   "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMjU2IDI1NiI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB4Mj0iMSIgeTE9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2I3YjliNyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjUwJSIgc3RvcC1jb2xvcj0iI2E0YTZhNCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM4YjhmOGMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiBmaWxsPSJyZ2JhKDAsMCwwLDApIi8+CiAgPHBhdGggZmlsbD0idXJsKCNnKSIgc3Ryb2tlPSIjNmU2ZjZlIiBzdHJva2Utd2lkdGg9IjMiIGQ9Ik03NiA2MGMyOC0xOCA1NC0yNiA4Mi04IDE4IDEwIDMwIDIzIDM0IDQwIDQgMTgtMiAzMS02IDQ2LTUgMjAtMjAgMzYtMzggNDYtMTYgMTAtNDYgMTgtNzQgNi0yMi0xMC00Mi0zOC00Mi02NCAwLTIwIDE2LTQ2IDQ0LTY2eiIvPgogIDxwYXRoIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xNCkiIGQ9Ik0xMDAgNzRjMTItMTAgMzYtMTYgNTYtOCAxOCA3IDMyIDIyIDMyIDM4IDAgOC00IDEwLTEwIDYtMTItOC0yNC0xNC00Mi0xNC0yMCAwLTM0LTgtNDAtMTYtMi0yIDAtNCA0LTZ6Ii8+Cjwvc3ZnPg==";
@@ -28,11 +29,36 @@ function setup() {
   renderHeight(pg);
   isReady = true;
 
+  if (latestPlan) {
+    redrawZen(latestPlan);
+  }
+
+  if (typeof window !== "undefined" && window.dispatchEvent) {
+    window.dispatchEvent(new Event("zen-sketch-ready"));
+  }
+
   if (pendingPlan) {
     const planToApply = pendingPlan;
     pendingPlan = null;
     redrawZen(planToApply);
   }
+}
+
+function handlePlanUpdate(plan) {
+  latestPlan = plan;
+
+  if (!isReady) {
+    pendingPlan = plan;
+    return;
+  }
+
+  redrawZen(plan);
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("zen-plan-update", (event) => {
+    handlePlanUpdate(event.detail);
+  });
 }
 
 function loadRock() {
@@ -222,3 +248,6 @@ function redrawZen(plan) {
 
   renderHeight(pg);
 }
+
+// Expose the redraw hook so the UI can safely invoke it after plan updates.
+window.redrawZen = redrawZen;
