@@ -258,6 +258,29 @@
       }
     }
 
+    function deactivateDuringExecution() {
+      [btnHorizontal, btnCircle, btnCluster, btnRock, btnClear, btnRun, btnAutoRun].forEach((btn) => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('deactivated');
+        btn.classList.remove('primary');
+      });
+    }
+
+    function reactivateAfterExecution() {
+      reactivateActionButtons();
+      syncActionButtons();
+      updateRunButtonState();
+      if (btnClear) {
+        btnClear.disabled = false;
+        btnClear.classList.remove('deactivated');
+      }
+      if (btnAutoRun) {
+        btnAutoRun.disabled = false;
+        btnAutoRun.classList.remove('deactivated');
+      }
+    }
+
     function updateRunButtonState() {
       if (!btnRun) return;
       const hasSteps = plan.steps.length > 0;
@@ -276,11 +299,18 @@
       }
     }
 
+    function renderPreview() {
+      if (typeof redrawZen === 'function') {
+        redrawZen(plan);
+      }
+    }
+
     function updateStepList() {
       const listDiv = document.getElementById('stepList');
       updateRunButtonState();
       if (!plan.steps.length) {
         listDiv.textContent = 'No steps yet.';
+        renderPreview();
         return;
       }
       listDiv.innerHTML = plan.steps.map((step, idx) => {
@@ -297,6 +327,8 @@
       }).join('<br>');
 
       syncActionButtons();
+
+      renderPreview();
     }
 
     async function loadPlan() {
@@ -304,9 +336,6 @@
         const res = await fetch('/api/plan');
         plan = await res.json();
         updateStepList();
-        if (typeof redrawZen === 'function') {
-          redrawZen(plan);
-        }
       } catch (err) {
         console.error('Failed to load plan', err);
       }
@@ -317,7 +346,6 @@
         btnHorizontal.addEventListener('click', (event) => {
           plan.steps.push({ type: 'horizontal', numLines: 36 });
           updateStepList();
-          redrawZen(plan);
           deactivateActionButton(event.currentTarget);
         });
       }
@@ -326,7 +354,6 @@
         btnCircle.addEventListener('click', (event) => {
           plan.steps.push({ type: 'circle', r: 100 });
           updateStepList();
-          redrawZen(plan);
           deactivateActionButton(event.currentTarget);
         });
       }
@@ -335,7 +362,6 @@
         btnCluster.addEventListener('click', (event) => {
           plan.steps.push({ type: 'cluster', r: 65 });
           updateStepList();
-          redrawZen(plan);
           deactivateActionButton(event.currentTarget);
         });
       }
@@ -344,7 +370,6 @@
         btnRock.addEventListener('click', (event) => {
           plan.steps.push({ type: 'rock' });
           updateStepList();
-          redrawZen(plan);
           deactivateActionButton(event.currentTarget);
         });
       }
@@ -353,7 +378,6 @@
         btnClear.addEventListener('click', () => {
           plan = { steps: [] };
           updateStepList();
-          redrawZen(plan);
           reactivateActionButtons();
         });
       }
@@ -431,9 +455,6 @@
 
           plan.steps = optimizedSteps;
           updateStepList();
-          if (typeof redrawZen === 'function') {
-            redrawZen(plan);
-          }
 
           if (wasChanged) {
             window.alert('The execution steps were optimized. Press OK to continue.');

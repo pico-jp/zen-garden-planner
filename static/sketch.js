@@ -222,3 +222,6 @@ function redrawZen(plan) {
 
   renderHeight(pg);
 }
+
+// Expose the redraw hook so the UI can safely invoke it after plan updates.
+window.redrawZen = redrawZen;
