@@ -28,6 +28,10 @@ function setup() {
   renderHeight(pg);
   isReady = true;
 
+  if (typeof window !== "undefined" && window.dispatchEvent) {
+    window.dispatchEvent(new Event("zen-sketch-ready"));
+  }
+
   if (pendingPlan) {
     const planToApply = pendingPlan;
     pendingPlan = null;
@@ -222,3 +226,6 @@ function redrawZen(plan) {
 
   renderHeight(pg);
 }
+
+// Expose the redraw hook so the UI can safely invoke it after plan updates.
+window.redrawZen = redrawZen;
